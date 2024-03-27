@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from pipx.constants import FETCH_MISSING_PYTHON, WINDOWS
+from pipx.constants import FETCH_MISSING_PYTHON, WINDOWS, MINGW
 from pipx.standalone_python import download_python_build_standalone
 from pipx.util import PipxError
 
@@ -103,7 +103,10 @@ def find_py_launcher_python(python_version: Optional[str] = None) -> Optional[st
 def _find_default_windows_python() -> str:
     if has_venv():
         return sys.executable
-    python = find_py_launcher_python() or shutil.which("python")
+    if MINGW:
+        python = shutil.which("python") or find_py_launcher_python()
+    else:
+        python = find_py_launcher_python() or shutil.which("python")
 
     if python is None:
         raise PipxError("No suitable Python found")
